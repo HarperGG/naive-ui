@@ -8,7 +8,8 @@ import {
   defineComponent,
   PropType,
   CSSProperties,
-  watchEffect
+  watchEffect,
+  renderSlot
 } from 'vue'
 import { useMergedState } from 'vooks'
 import { NSelect } from '../../select'
@@ -30,7 +31,12 @@ import style from './styles/index.cssr'
 import { call, ExtractPublicPropTypes, MaybeArray, warn } from '../../_utils'
 import type { Size as InputSize } from '../../input/src/interface'
 import type { Size as SelectSize } from '../../select/src/interface'
-import { RenderPrefix, RenderSuffix } from './interface'
+import {
+  RenderPrefix,
+  RenderSuffix,
+  RenderFastPrev,
+  RenderFastNext
+} from './interface'
 
 const paginationProps = {
   ...(useTheme.props as ThemeProps<PaginationTheme>),
@@ -40,6 +46,7 @@ const paginationProps = {
     default: 1
   },
   itemCount: Number,
+  itemRender: Function as PropType<RenderFastPrev>,
   pageCount: Number,
   defaultPageCount: {
     type: Number,
@@ -58,6 +65,8 @@ const paginationProps = {
     type: Number,
     default: 9
   },
+  fastPrev: Function as PropType<RenderFastPrev>,
+  fastNext: Function as PropType<RenderFastNext>,
   prefix: Function as PropType<RenderPrefix>,
   suffix: Function as PropType<RenderSuffix>,
   'onUpdate:page': [Function, Array] as PropType<
@@ -426,6 +435,7 @@ export default defineComponent({
       mergedPageSize,
       pageSizeOptions,
       jumperValue,
+      fastPrev,
       prefix,
       suffix,
       handleJumperInput,
@@ -459,18 +469,45 @@ export default defineComponent({
             })}
           </div>
         ) : null}
-        <div
-          class={[
-            `${mergedClsPrefix}-pagination-item ${mergedClsPrefix}-pagination-item--button`,
-            (mergedPage <= 1 || mergedPage > mergedPageCount || disabled) &&
-              `${mergedClsPrefix}-pagination-item--disabled`
-          ]}
-          onClick={handleBackwardClick}
-        >
-          <NBaseIcon clsPrefix={mergedClsPrefix}>
-            {{ default: () => <BackwardIcon /> }}
-          </NBaseIcon>
-        </div>
+        {this.itemRender ? (
+          h(
+            'div',
+            {
+              class: [
+                `${mergedClsPrefix}-pagination-item`,
+                (mergedPage <= 1 || mergedPage > mergedPageCount || disabled) &&
+                  `${mergedClsPrefix}-pagination-item--disabled`
+              ],
+              onClick: handleBackwardClick
+            },
+            {
+              default: () => [
+                this.itemRender?.(
+                  mergedPage,
+                  'prev',
+                  renderSlot(this.$slots, 'default', undefined, () => [
+                    <NBaseIcon clsPrefix={mergedClsPrefix}>
+                      {{ default: () => <BackwardIcon /> }}
+                    </NBaseIcon>
+                  ])
+                )
+              ]
+            }
+          )
+        ) : (
+          <div
+            class={[
+              `${mergedClsPrefix}-pagination-item ${mergedClsPrefix}-pagination-item--button`,
+              (mergedPage <= 1 || mergedPage > mergedPageCount || disabled) &&
+                `${mergedClsPrefix}-pagination-item--disabled`
+            ]}
+            onClick={handleBackwardClick}
+          >
+            <NBaseIcon clsPrefix={mergedClsPrefix}>
+              {{ default: () => <BackwardIcon /> }}
+            </NBaseIcon>
+          </div>
+        )}
         {pageItems.map((pageItem, index) => {
           return (
             <div
@@ -513,6 +550,38 @@ export default defineComponent({
             </div>
           )
         })}
+
+        {fastPrev || $slots.fastPrev ? (
+          <div
+            class={[
+              `${mergedClsPrefix}-pagination-item`,
+              {
+                [`${mergedClsPrefix}-pagination-item--disabled`]:
+                  mergedPage < 1 || mergedPage >= mergedPageCount || disabled
+              }
+            ]}
+            onClick={handleForwardClick}
+          >
+            {($slots.fastPrev
+              ? ($slots.fastPrev as unknown as RenderFastPrev)
+              : fastPrev)({
+              page: mergedPage,
+              pageSize: mergedPageSize,
+              pageCount: mergedPageCount
+            })}
+          </div>
+        ) // <div class={`${mergedClsPrefix}-pagination-suffix`}>
+        //   {($slots.suffix
+        //     ? ($slots.suffix as unknown as RenderSuffix)
+        //     : suffix!)({
+        //     page: mergedPage,
+        //     pageSize: mergedPageSize,
+        //     pageCount: mergedPageCount,
+        //     startIndex: this.startIndex,
+        //     endIndex: this.endIndex
+        //   })}
+        // </div>
+          : null}
         <div
           class={[
             `${mergedClsPrefix}-pagination-item ${mergedClsPrefix}-pagination-item--button`,
@@ -527,6 +596,7 @@ export default defineComponent({
             {{ default: () => <ForwardIcon /> }}
           </NBaseIcon>
         </div>
+
         {showSizePicker ? (
           <NSelect
             size={selectSize}

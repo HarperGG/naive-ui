@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Pending
+
+### Feats
+
+- `n-pagination` 新增 `item-render` 属性，有关 [#648](https://github.com/TuSimple/naive-ui/issues/648)
+
 ## 2.15.7 (2021-07-25)
 
 ### Feats

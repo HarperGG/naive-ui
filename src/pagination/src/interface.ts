@@ -8,4 +8,12 @@ export type RenderPrefix = (info: {
   pageCount: number
 }) => VNode
 
+// export type RenderFastPrev = (
+//   page: number
+//   pageSize: number
+//   pageCount: number
+//   originalElement: VNode
+// ) => VNodeChild
+
 export type RenderSuffix = RenderPrefix
+// export type RenderFastNext = RenderFastPrev

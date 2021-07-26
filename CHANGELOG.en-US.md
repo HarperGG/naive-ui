@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Pending
+
+### Feats
+
+- `n-pagination` add `item-render` prop, ref [#648](https://github.com/TuSimple/naive-ui/issues/648).
+
 ## 2.15.7 (2021-07-25)
 
 ### Feats

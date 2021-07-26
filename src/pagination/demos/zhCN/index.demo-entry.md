@@ -13,16 +13,18 @@ quick-jumper
 size-picker
 disabled
 item-count
+item-render
 prefix
 ```
 
 ## Props
 
 | 名称 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | default-page | `number` | `1` | 非受控模式下的当前页 |
 | default-page-size | `number` | `10` | 非受控模式下的分页大小 |
 | item-count | `number` | `undefined` | 总条数 |
+| item-render | (page: number, type: 'prev' | 'next', originalElement: VNodeChild) => VNode | `undefined` | 自定义渲染上一页下一页 |
 | page-count | `number` | `1` | 总页数 |
 | page-sizes | `Array<number>` | `['10']` | 每页条数 |
 | page-size | `number` | `undefined` | 受控模式下的分页大小 |
