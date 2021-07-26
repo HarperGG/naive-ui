@@ -8,7 +8,10 @@ import {
   defineComponent,
   PropType,
   CSSProperties,
-  watchEffect
+  watchEffect,
+  VNodeChild,
+  VNode,
+  renderSlot
 } from 'vue'
 import { useMergedState } from 'vooks'
 import { NSelect } from '../../select'
@@ -40,6 +43,9 @@ const paginationProps = {
     default: 1
   },
   itemCount: Number,
+  itemRender: Function as PropType<
+  (page: number, type: 'prev' | 'next', originalElement: VNode) => VNodeChild
+  >,
   pageCount: Number,
   defaultPageCount: {
     type: Number,
@@ -459,18 +465,45 @@ export default defineComponent({
             })}
           </div>
         ) : null}
-        <div
-          class={[
-            `${mergedClsPrefix}-pagination-item ${mergedClsPrefix}-pagination-item--button`,
-            (mergedPage <= 1 || mergedPage > mergedPageCount || disabled) &&
-              `${mergedClsPrefix}-pagination-item--disabled`
-          ]}
-          onClick={handleBackwardClick}
-        >
-          <NBaseIcon clsPrefix={mergedClsPrefix}>
-            {{ default: () => <BackwardIcon /> }}
-          </NBaseIcon>
-        </div>
+        {this.itemRender ? (
+          h(
+            'div',
+            {
+              class: [
+                `${mergedClsPrefix}-pagination-item`,
+                (mergedPage <= 1 || mergedPage > mergedPageCount || disabled) &&
+                  `${mergedClsPrefix}-pagination-item--disabled`
+              ],
+              onClick: handleBackwardClick
+            },
+            {
+              default: () => [
+                this.itemRender?.(
+                  mergedPage,
+                  'prev',
+                  renderSlot(this.$slots, 'default', undefined, () => [
+                    <NBaseIcon clsPrefix={mergedClsPrefix}>
+                      {{ default: () => <BackwardIcon /> }}
+                    </NBaseIcon>
+                  ])
+                )
+              ]
+            }
+          )
+        ) : (
+          <div
+            class={[
+              `${mergedClsPrefix}-pagination-item ${mergedClsPrefix}-pagination-item--button`,
+              (mergedPage <= 1 || mergedPage > mergedPageCount || disabled) &&
+                `${mergedClsPrefix}-pagination-item--disabled`
+            ]}
+            onClick={handleBackwardClick}
+          >
+            <NBaseIcon clsPrefix={mergedClsPrefix}>
+              {{ default: () => <BackwardIcon /> }}
+            </NBaseIcon>
+          </div>
+        )}
         {pageItems.map((pageItem, index) => {
           return (
             <div
@@ -513,20 +546,49 @@ export default defineComponent({
             </div>
           )
         })}
-        <div
-          class={[
-            `${mergedClsPrefix}-pagination-item ${mergedClsPrefix}-pagination-item--button`,
+        {this.itemRender ? (
+          h(
+            'div',
             {
-              [`${mergedClsPrefix}-pagination-item--disabled`]:
-                mergedPage < 1 || mergedPage >= mergedPageCount || disabled
+              class: [
+                `${mergedClsPrefix}-pagination-item`,
+                {
+                  [`${mergedClsPrefix}-pagination-item--disabled`]:
+                    mergedPage < 1 || mergedPage >= mergedPageCount || disabled
+                }
+              ],
+              onClick: handleForwardClick
+            },
+            {
+              default: () => [
+                this.itemRender?.(
+                  mergedPage,
+                  'next',
+                  renderSlot(this.$slots, 'default', undefined, () => [
+                    <NBaseIcon clsPrefix={mergedClsPrefix}>
+                      {{ default: () => <ForwardIcon /> }}
+                    </NBaseIcon>
+                  ])
+                )
+              ]
             }
-          ]}
-          onClick={handleForwardClick}
-        >
-          <NBaseIcon clsPrefix={mergedClsPrefix}>
-            {{ default: () => <ForwardIcon /> }}
-          </NBaseIcon>
-        </div>
+          )
+        ) : (
+          <div
+            class={[
+              `${mergedClsPrefix}-pagination-item ${mergedClsPrefix}-pagination-item--button`,
+              {
+                [`${mergedClsPrefix}-pagination-item--disabled`]:
+                  mergedPage < 1 || mergedPage >= mergedPageCount || disabled
+              }
+            ]}
+            onClick={handleForwardClick}
+          >
+            <NBaseIcon clsPrefix={mergedClsPrefix}>
+              {{ default: () => <ForwardIcon /> }}
+            </NBaseIcon>
+          </div>
+        )}
         {showSizePicker ? (
           <NSelect
             size={selectSize}

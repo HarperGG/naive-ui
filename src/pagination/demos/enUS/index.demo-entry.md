@@ -13,16 +13,18 @@ quick-jumper
 size-picker
 disabled
 item-count
+item-render
 prefix
 ```
 
 ## Props
 
 | Name | Type | Default | Description |
-| --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | default-page | `number` | `1` |  |
 | default-page-size | `number` | `10` |  |
 | item-count | `number` | `undefined` |  |
+| item-render | (page: number, type: 'prev' | 'next', originalElement: VNodeChild) => VNode | `undefined` |  |
 | page-count | `number` | `1` |  |
 | page-sizes | `Array<number>` | `['10']` |  |
 | page-size | `number` | `undefined` |  |
