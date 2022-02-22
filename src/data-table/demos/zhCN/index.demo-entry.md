@@ -12,42 +12,9 @@
 </n-alert>
 
 ```demo
-basic.vue
-empty
-border
-size
-row-props
-merge-cell
-filter-and-sorter
-multiple-sorter
-select
-custom-select
-group-header
-controlled-page
-controlled-filter
-controlled-sorter
-controlled-multiple-sorter
-fixed-header
-fixed-header-column
-summary
-ellipsis
-ellipsis-tooltip
-expand
-render-header
-custom-style
-ajax-usage
-virtual
-custom-filter-menu.vue
+
 tree
-flex-height
-striped
-simple-editable
-switchable-editable
-context-menu.vue
-fixed-column-debug
-fixed-column2-debug
-scroll-debug
-height-debug
+
 ```
 
 ## API

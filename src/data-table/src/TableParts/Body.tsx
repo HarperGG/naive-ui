@@ -19,7 +19,7 @@ import { useMemo } from 'vooks'
 import { cssrAnchorMetaName } from '../../../_mixins/common'
 import { c } from '../../../_utils/cssr'
 import { NScrollbar, ScrollbarInst } from '../../../_internal'
-import { formatLength, resolveSlot } from '../../../_utils'
+import { formatLength, resolveSlot, warn } from '../../../_utils'
 import { NEmpty } from '../../../empty'
 import {
   dataTableInjectionKey,
@@ -171,6 +171,8 @@ export default defineComponent({
       maxHeightRef,
       stripedRef,
       loadingRef,
+      onLoadRef,
+      loadingExpandKeysRef,
       setHeaderScrollLeft,
       doUpdateExpandedRowKeys,
       handleTableBodyScroll,
@@ -180,6 +182,7 @@ export default defineComponent({
     } = inject(dataTableInjectionKey)!
     const scrollbarInstRef = ref<ScrollbarInst | null>(null)
     const virtualListRef = ref<VirtualListInst | null>(null)
+    const loadingKeysRef = ref(new Set<string | number>())
     const emptyElRef = ref<HTMLElement | null>(null)
     const emptyRef = useMemo(() => paginatedDataRef.value.length === 0)
     // If header is not inside & empty is displayed, no table part would be
@@ -249,7 +252,7 @@ export default defineComponent({
       if (value) return value.containerRef
       return null
     }
-    function handleUpdateExpanded (key: RowKey): void {
+    function handleUpdateExpanded (key: RowKey, rowInfo: RowRenderInfo): void {
       const { value: mergedExpandedRowKeys } = mergedExpandedRowKeysRef
       const index = mergedExpandedRowKeys.indexOf(key)
       const nextExpandedKeys = Array.from(mergedExpandedRowKeys)
@@ -258,7 +261,25 @@ export default defineComponent({
       } else {
         nextExpandedKeys.push(key)
       }
+      void triggerLoading(rowInfo)
       doUpdateExpandedRowKeys(nextExpandedKeys)
+    }
+    async function triggerLoading (rowInfo: RowRenderInfo): Promise<void> {
+      const { value: loadingKeys } = loadingExpandKeysRef
+      const { value: onLoad } = onLoadRef
+      return await new Promise((resolve) => {
+        if (!loadingKeys.has(rowInfo.key)) {
+          loadingKeys.add(rowInfo.key)
+          onLoad(rowInfo)
+            .then(() => {
+              loadingKeys.delete(rowInfo.key)
+              resolve()
+            })
+            .catch((loadError) => {
+              console.error(loadError)
+            })
+        }
+      })
     }
     function handleMouseleaveTable (): void {
       hoverKeyRef.value = null
@@ -736,8 +757,9 @@ export default defineComponent({
                                   class={`${mergedClsPrefix}-data-table-expand-trigger`}
                                   clsPrefix={mergedClsPrefix}
                                   expanded={expanded}
+                                  loading={this.loading}
                                   onClick={() => {
-                                    handleUpdateExpanded(rowKey)
+                                    handleUpdateExpanded(rowKey, rowInfo)
                                   }}
                                 />
                               )
@@ -765,7 +787,8 @@ export default defineComponent({
                               <ExpandTrigger
                                 clsPrefix={mergedClsPrefix}
                                 expanded={expanded}
-                                onClick={() => handleUpdateExpanded(rowKey)}
+                                loading={this.loading}
+                                onClick={() => handleUpdateExpanded(rowKey, rowInfo)}
                               />
                                 ) : null
                           ) : null

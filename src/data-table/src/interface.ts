@@ -188,6 +188,7 @@ export interface DataTableInjection {
   mergedSortStateRef: Ref<SortState[]>
   mergedFilterStateRef: Ref<FilterState>
   loadingRef: Ref<boolean>
+  loadingExpandKeysRef: Ref<Set<string | number>>
   rowClassNameRef: Ref<string | CreateRowClassName | undefined>
   mergedCheckedRowKeySetRef: Ref<Set<RowKey>>
   mergedInderminateRowKeySetRef: Ref<Set<RowKey>>
@@ -208,6 +209,8 @@ export interface DataTableInjection {
   flexHeightRef: Ref<boolean>
   headerCheckboxDisabledRef: Ref<boolean>
   stripedRef: Ref<boolean>
+  onLoadRef: Ref<((row: RowData) => Promise<void>) | undefined>
+
   doUpdateExpandedRowKeys: (keys: RowKey[]) => void
   doUpdateFilters: (
     filters: FilterState,

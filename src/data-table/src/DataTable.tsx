@@ -116,6 +116,7 @@ export const dataTableProps = {
     type: Number,
     default: 16
   },
+  onLoad: Function as PropType<((row: RowData) => Promise<void>)>,
   flexHeight: Boolean,
   'onUpdate:page': [Function, Array] as PropType<
   PaginationProps['onUpdate:page']
@@ -266,6 +267,7 @@ export default defineComponent({
     const {
       mergedExpandedRowKeysRef,
       renderExpandRef,
+      loadingExpandKeysRef,
       doUpdateExpandedRowKeys
     } = useExpand(props)
     const {
@@ -329,6 +331,7 @@ export default defineComponent({
       mergedSortStateRef,
       mergedFilterStateRef,
       loadingRef: toRef(props, 'loading'),
+      loadingExpandKeysRef,
       rowClassNameRef: toRef(props, 'rowClassName'),
       mergedCheckedRowKeySetRef,
       mergedExpandedRowKeysRef,
@@ -365,6 +368,7 @@ export default defineComponent({
       minHeightRef: toRef(props, 'minHeight'),
       flexHeightRef: toRef(props, 'flexHeight'),
       headerCheckboxDisabledRef,
+      onLoadRef: toRef(props, 'onLoad'),
       syncScrollState,
       doUpdateFilters,
       deriveNextSorter,
